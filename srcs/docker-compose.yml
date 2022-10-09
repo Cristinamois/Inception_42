@@ -1,0 +1,74 @@
+version: '3.3'
+
+networks:
+  inception_network:
+
+volumes :
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      o: "bind"
+      device: "/home/cmois/data/mariadb"
+  wp:
+    driver: local
+    driver_opts:
+      type: none
+      o: "bind"
+      device: "/home/cmois/data/wordpress"
+  adm:
+    driver: local
+    driver_opts:
+      type: none
+      o: "bind"
+      device: "/home/cmois/data/adminer"
+
+services:
+
+  mariadb:
+    image: mariadb:inception
+    container_name: mariadb
+    build: ./requirements/mariadb
+    networks:
+      - inception_network
+    restart: always
+    volumes:
+     - db:/var/lib/mysql
+    env_file: .env
+
+
+  wordpress:
+    image: wordpress:inception
+    container_name: wordpress
+    build: requirements/wordpress/
+    volumes:
+      - wp:/var/www/wordpress
+      - adm:/var/www/adminer 
+    networks:
+      - inception_network
+    restart: always
+    depends_on:
+      - mariadb 
+    env_file: .env
+
+
+
+  nginx:
+    image: nginx:inception
+    container_name: nginx
+    build: requirements/nginx/
+    volumes:
+      - wp:/var/www/wordpress
+    ports: 
+      - 443:443
+    restart: always
+    depends_on:
+      - wordpress
+    networks:
+      - inception_network
+  
+
+    
+
+
+

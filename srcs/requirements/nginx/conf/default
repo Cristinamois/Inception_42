@@ -1,0 +1,42 @@
+
+
+server {
+
+        listen 443 ssl default_server;
+		listen [::]:443 ssl default_server;
+		
+		server_name cmois.42.fr;
+
+		ssl_certificate     cmois.42.fr.crt;
+    	ssl_certificate_key cmois.42.fr.key;
+		ssl_protocols       TLSv1.2 TLSv1.3 ;
+
+        root /var/www/wordpress;
+        index index.php;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+	location /adminer/ {
+		index adminer.php;
+    }
+
+		 # pass the PHP scripts to FastCGI server listening on wordpress:9000
+
+		location ~ \.php$ {
+		    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+		    include fastcgi_params;
+		    fastcgi_param SCRIPT_FILENAME $request_filename;
+		    fastcgi_intercept_errors on;
+		    fastcgi_pass wordpress:9000;
+		    #fastcgi_pass php-fpm;
+		}
+		
+}
+
+
+		
+
+
+
